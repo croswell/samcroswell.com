@@ -1,0 +1,34 @@
+---
+import { type CollectionEntry } from 'astro:content';
+import ArrowRight from '../icons/ArrowRight.astro';
+import FormattedDate from './FormattedDate.astro';
+
+type Props = { post: CollectionEntry<'blog'>; class?: string; headingLevel?: 'h2' | 'h3' };
+
+const { post, class: className, headingLevel = 'h2' } = Astro.props;
+const { title, publishDate, updatedDate, excerpt } = post.data;
+const TitleTag = headingLevel;
+---
+
+<a class:list={['flex flex-col justify-between items-start group', className]} href={`/blog/${post.slug}/`}>
+    <div class="flex w-full items-center justify-between">
+        <TitleTag
+            class="text-lg leading-tight font-medium group-hover:underline group-hover:decoration-dashed group-hover:underline-offset-4 group-hover:decoration-1"
+        >
+            {title}
+        </TitleTag>
+        <div class="text-muted mt-1 text-sm leading-normal">
+            <FormattedDate date={publishDate} />
+            {
+                updatedDate && (
+                    <>
+                        {' '}
+                        <span>
+                            (Updated on <FormattedDate date={updatedDate} />)
+                        </span>
+                    </>
+                )
+            }
+        </div>
+    </div>
+</a>

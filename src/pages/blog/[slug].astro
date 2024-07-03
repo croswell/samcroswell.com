@@ -1,0 +1,63 @@
+---
+import { type CollectionEntry, getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Button from '../../components/Button.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import PostPreview from '../../components/PostPreview.astro';
+import Subscribe from '../../components/Subscribe.astro';
+import { sortItemsByDateDesc } from '../../utils/data-utils';
+import { slugify } from '../../utils/common-utils';
+
+export async function getStaticPaths() {
+    const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+    const postCount = posts.length;
+    return posts.map((post, index) => ({
+        params: { slug: post.slug },
+        props: {
+            post,
+            prevPost: index + 1 !== postCount ? posts[index + 1] : null,
+            nextPost: index !== 0 ? posts[index - 1] : null
+        }
+    }));
+}
+
+type Props = { post: CollectionEntry<'blog'>; prevPost: CollectionEntry<'blog'>; nextPost: CollectionEntry<'blog'> };
+
+const { href } = Astro.url;
+const { post, prevPost, nextPost } = Astro.props;
+const { title, publishDate, updatedDate, excerpt, tags = [], seo } = post.data;
+const { Content } = await post.render();
+---
+
+<BaseLayout title={seo?.title ?? title} description={seo?.description ?? excerpt} image={seo?.image} pageType="article" showHeader={false}>
+    <article class="mb-16 sm:mb-24">
+        <header class="mb-8">
+            <h1 class="text-3xl leading-tight tracking-tight font-medium">{title}</h1>
+            <div class="text-muted mt-4 text-sm">
+                <FormattedDate date={publishDate} />
+                {
+                    updatedDate && (
+                        <>
+                            {' '}
+                            <span>
+                                (Updated on <FormattedDate date={updatedDate} />)
+                            </span>
+                        </>
+                    )
+                }
+            </div>
+        </header>
+        <div class="max-w-none prose prose-dante sm:prose-lg">
+            <Content />
+        </div>
+    </article>
+    {
+        (prevPost || nextPost) && (
+            <div class="my-16 sm:my-24 border-t border-main pt-16">
+                <h2 class="mb-12 text-xl sm:mb-16 sm:text-2xl">Read Next</h2>
+                {nextPost && <PostPreview post={nextPost} class="mb-10 sm:mb-12" headingLevel="h3" />}
+                {prevPost && <PostPreview post={prevPost} class="mb-10 sm:mb-12" headingLevel="h3" />}
+            </div>
+        )
+    }
+</BaseLayout>
