@@ -2,18 +2,17 @@
 import { type CollectionEntry } from 'astro:content';
 import ArrowRight from '../icons/ArrowRight.astro';
 
-type Props = { project: CollectionEntry<'projects'>; class?: string; headingLevel?: 'h2' | 'h3' };
+type Props = { project: CollectionEntry<'projects'>; class?: string; headingLevel?: 'h2' | 'h3'; image: string };
 
-const { project, class: className, headingLevel = 'h2' } = Astro.props;
-const { title, description } = project.data;
+const { project, class: className, image = "/images/post-1.jpg", headingLevel = 'h2' } = Astro.props;
+const { title } = project.data;
 const TitleTag = headingLevel;
 ---
 
 <a class:list={['flex flex-col justify-between items-start gap-4 group', className]} href={`/projects/${project.slug}/`}>
     <div class="grow">
-        <TitleTag
-            class="text-xl leading-tight tracking-tight font-medium"
-        >
+        <img src="{project.seo}" width="400" height="400" />
+        <TitleTag class="text-xl leading-tight tracking-tight font-medium">
             {title}
         </TitleTag>
     </div>
